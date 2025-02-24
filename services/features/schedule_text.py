@@ -1,4 +1,4 @@
-#もうちょっと機能追加するかもしれないです。一週間分をまとめて出力とか
+#もうちょっと機能追加します。移動時間考慮とか一週間分をまとめて出力とか
 from services.google_calendar_api.calendarManager import create_google_calendar_service  
 # Google Calendar API の接続(/services/google_calendar_api/calendarManagerから)
 from datetime import datetime, timedelta
