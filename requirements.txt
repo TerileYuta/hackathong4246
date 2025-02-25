@@ -423,3 +423,10 @@ zict @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/zict_169954
 zipp @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/zipp_1707493775475/work
 zope.interface @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/zope.interface_1699497164709/work
 zstandard==0.23.0
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+dateparser
+flask
+firebase-admin
