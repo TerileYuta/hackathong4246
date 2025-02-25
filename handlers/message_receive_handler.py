@@ -1,7 +1,23 @@
-"""
+def receiveMessage_Handler(message: str):
+    """
+    
+    受信したメッセージを分析し、リプライメッセージを作成する
 
-１．受信したメッセージを取得
-２．メッセージを分析（別ファイル./langcahin/rule内）
-３．対応した関数を実行
+    Parameters
+    ----------
+        message(str) : ユーザーメッセージ
 
-"""
+    Returns
+    ----------
+        dict : リプライメッセージに関する情報
+
+    """
+
+    #TODO : メッセージの分析等の処理の追加
+
+    return [
+        {
+        "type" : "text",
+        "text" : f"あなたのメッセージ：{message}"
+        }    
+    ]
