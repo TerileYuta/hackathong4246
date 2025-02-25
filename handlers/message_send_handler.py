@@ -46,8 +46,6 @@ def sendMessage_Handler(sendList: list, event = None, debug: bool = False):
                 reply_token = event.reply_token,
                 messages = messages,
             )
-
-            print(messages)
                     
             messaging_api.reply_message(request_body)
         except: 
