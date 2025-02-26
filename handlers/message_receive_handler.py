@@ -1,4 +1,4 @@
-from handlers.langchain import model_invoke
+from handlers.langgraph import invoke
 from langchain_core.messages import HumanMessage
 
 def receiveMessage_Handler(message: str):
@@ -19,7 +19,7 @@ def receiveMessage_Handler(message: str):
     #TODO : メッセージの分析等の処理の追加
 
     # lang-graphによる処理の場合
-    model_output = model_invoke(message)
+    model_output = invoke(message)
 
     return [
         {

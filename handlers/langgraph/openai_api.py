@@ -5,4 +5,4 @@ from langchain_openai import ChatOpenAI
 OPENAI_API_KEY =get_env("OPENAI_API_KEY")
 
 # ChatModelの作成
-GPTModel = ChatOpenAI(model = "gpt-4o-mini")
+llm = ChatOpenAI(model = "gpt-4o-mini")

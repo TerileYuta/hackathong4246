@@ -55,7 +55,15 @@ def listEvents(
    max_results:int =10       
 ):
 
-    return "予定取得完了"
+    return """
+        1. 会議
+   開始時刻: 2025-03-03 10:00
+   終了時刻: 2025-03-03 11:00
+
+2. 会議
+   開始時刻: 2025-03-05 10:00
+   終了時刻: 2025-03-06 11:00
+"""
 
 class findAvailableTimeArgs(BaseModel):
     pass
@@ -66,6 +74,8 @@ def findAvailableTime(
 
     return "空き時間取得成功"
 
+def askUser():
+    return "Think about what you would like to confirm or ask the user."
 
 tool_list = [
     StructuredTool.from_function(
@@ -97,6 +107,12 @@ tool_list = [
         func = findAvailableTime,
         args_schema = findAvailableTimeArgs,
         description = "Searches for available time slots based on the given constraints.",
+    ),
+    StructuredTool.from_function(
+        name = "askUser",
+        func = askUser,
+        args_schema = None,
+        description = "Now users can confirm or ask questions when information is unclear or ambiguous.",
     )
 ]
 
