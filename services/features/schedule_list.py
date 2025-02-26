@@ -11,8 +11,8 @@ def get_events_for_date(date):
         list:{dict}
         [{"id": "abc123",
         "summary": "ミーティング",
-        "start": "2025-02-24T10:00:00",
-        "end": "2025-02-24T11:00:00",
+        "start": {"dateTime": "2025-02-24T10:00:00"},
+        "end": {"dateTime": "2025-02-24T11:00:00"},
         "location": "東京オフィス",
         "attendees": ["user1@example.com", "user2@example.com"]
         }]
@@ -33,8 +33,8 @@ def get_events_for_date(date):
         extracted_events.append({
             "id": event.get("id"),
             "summary": event.get("summary", "（無題）"),
-            "start": event.get("start", {}).get("dateTime", ""),
-            "end": event.get("end", {}).get("dateTime", ""),
+            "start": event.get("start", {}),
+            "end": event.get("end", {}),
             "location": event.get("location", "未設定"),
             "attendees": [attendee["email"] for attendee in event.get("attendees", [])]
         })
