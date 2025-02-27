@@ -11,16 +11,22 @@ class DummyMessage:
     def __init__(self, text):
         self.text = text
 
+class DummySource:
+    def __init__(self, user_id):
+        self.userId = user_id 
+
 class DummyEvent:
-    def __init__(self, text):
+    def __init__(self, text, user_id):
         self.message = DummyMessage(text)
+        self.source = DummySource(user_id)
 
 debug = True
 
 while(True):
     user_message = input("あなた：")
-
-    replyList = receiveMessage_Handler(user_message)
+    user_id = "lineID"
+    event = DummyEvent(user_message, user_id)    
+    replyList = receiveMessage_Handler(event)
     result = sendMessage_Handler(replyList, None, True)
 
     for message in result:
