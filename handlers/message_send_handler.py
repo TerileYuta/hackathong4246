@@ -1,7 +1,6 @@
 # handlers/message_send_handler.py
 
 from utils.env import get_env
-from services.features.get_available_time import search_available_time
 
 from linebot.v3.messaging import (
     Configuration,
@@ -9,6 +8,7 @@ from linebot.v3.messaging import (
     MessagingApi,
 
     ReplyMessageRequest,
+    PushMessageRequest,
 
     TextMessage,
 )
@@ -19,7 +19,7 @@ configuration = Configuration(access_token=LINE_ACCESS_TOKEN)
 api_client = ApiClient(configuration)
 messaging_api = MessagingApi(api_client)
 
-def sendMessage_Handler(sendList: list, event = None, debug: bool = False):
+def sendMessage_Handler(sendList: list, event = None, debug: bool = False, line_id:str = None):
     """
     
     メッセージの送信処理
@@ -45,14 +45,19 @@ def sendMessage_Handler(sendList: list, event = None, debug: bool = False):
     
     if(not debug):
         try:
-            request_body = ReplyMessageRequest(
-                reply_token = event.reply_token,
-                messages = messages,
-            )
-
-            print(messages)
-                    
-            messaging_api.reply_message(request_body)
+            if(not line_id):
+                request_body = ReplyMessageRequest(
+                    reply_token = event.reply_token,
+                    messages = messages,
+                )
+                messaging_api.reply_message(request_body)
+            
+            else:
+                request_body = PushMessageRequest(
+                    to = line_id,
+                    messages = messages
+                )
+                messaging_api.push_message(request_body)
         except: 
             print("メッセージ送信エラー")
     else:

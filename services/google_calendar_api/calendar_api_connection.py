@@ -1,7 +1,5 @@
 # services/google_calendar_api/calendar_api_connection.py
 
-import json
-
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -24,7 +22,7 @@ class GoogleCalendarAPI():
         authenticate() : Google カレンダー API の認証を行い、認証済みのサービスオブジェクトを返す
 
     """
-    def __init__(self, line_id:str):
+    def __init__(self, line_id:str, root_url:str):
         """
         
         Parameters
@@ -33,9 +31,10 @@ class GoogleCalendarAPI():
 
         """
 
-        self.SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+        self.SCOPES = ['https://www.googleapis.com/auth/calendar']
 
         self.line_id = line_id
+        self.root_url = root_url
 
     def getToken(self):
         """
@@ -45,7 +44,7 @@ class GoogleCalendarAPI():
         Parameters
         ----------
             None
-            
+
         Returns
         ----------
             dict : トークン等の情報
@@ -119,7 +118,7 @@ class GoogleCalendarAPI():
         
         """
 
-        token = self.getToken(self.line_id)
+        token = self.getToken()
         creds = None
 
         credentials_path = Config.credentials_path
@@ -132,10 +131,19 @@ class GoogleCalendarAPI():
                 creds.refresh(Request())
 
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(credentials_path, self.SCOPES)
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    credentials_path,
+                    self.SCOPES,
+                    redirect_uri = f"{self.root_url}{Config.google_oauth_callback_url}"
+                )
 
-                creds = flow.run_local_server(port=0)
+                authorization_url, _  = flow.authorization_url(
+                    access_type='offline',
+                    prompt='consent'
+                )
 
-            self.updateToken(json.loads(creds.to_json()))
+                return authorization_url
     
-        return build("calendar", "v3", credentials=creds)
+        self.service = build("calendar", "v3", credentials=creds)
+
+        return False

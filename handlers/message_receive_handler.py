@@ -1,7 +1,8 @@
 # handlers/message_receive_handler.py
 
 import re
-from services.features.get_available_time import answer_available_time
+
+#from services.features.get_available_time import answer_available_time
 
 def receiveMessage_Handler(message: str):
     """
@@ -13,10 +14,12 @@ def receiveMessage_Handler(message: str):
     ----------
         dict : リプライメッセージに関する情報
     """
-
+    
+    """
     # メッセージに特定のキーワードが含まれている場合に空き時間を検索
     if "いつ" in message or "空いてる" in message:
         return answer_available_time(message)
+    """
     
     return [
         {

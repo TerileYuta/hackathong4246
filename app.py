@@ -1,17 +1,21 @@
-from flask import Flask, jsonify, request
+import secrets
+
+from flask import Flask, jsonify, request, redirect, session
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from linebot.v3.webhook import WebhookHandler
-from linebot.v3.webhooks import MessageEvent, TextMessageContent
+from linebot.v3.webhooks import MessageEvent, TextMessageContent, FollowEvent
 from linebot.v3.exceptions import InvalidSignatureError
+
+from google_auth_oauthlib.flow import Flow
 
 from handlers import receiveMessage_Handler
 from handlers import sendMessage_Handler
+from handlers import follow_Handler
 
-""" from services.calendar import get_available_time  
-from handlers.message_handler import ask_available_time
-from services.firestore_service import add_event, get_all_events   """
-from services.features.firestore_logic import add_user_data, get_user_data, update_user_data, delete_user_data
-from datetime import datetime
+from config import Config
+
+from services.google_calendar_api import GoogleCalendarAPI
 
 from utils.env import get_env
 
@@ -21,10 +25,100 @@ LINE_CHANNEL_SECRET = get_env('LINE_CHANNEL_SECRET')
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(32) 
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-@app.route('/')
-def home():
-    return "カレンダーアプリへようこそ！"
+# Oauth認証用ページ
+@app.route('/oauth')
+def google_login():
+    """
+    
+    Google認証用URLを作成する
+
+    Parameters
+    ----------
+        None
+
+    Returns
+    ----------
+        リダイレクトURL
+
+    """
+
+    line_id = request.args.get('line_id')
+
+    if not line_id:
+       return redirect(f"https://line.me/R/ti/p/{Config.official_line_id}")
+    
+    session["line_id"] = line_id
+
+    google_calendar_api = GoogleCalendarAPI(line_id, request.root_url)
+    auth_url = google_calendar_api.authenticate()
+
+    if auth_url:
+        return redirect(f"https://line.me/R/ti/p/{Config.official_line_id}")
+    else:
+        sendMessage_Handler(
+            [{
+                "type": "text",
+                "text": "Google Calendarの認証が完了しました"
+            }],
+            line_id = line_id
+        )
+
+        return redirect(f"https://line.me/R/ti/p/{Config.official_line_id}")
+    
+# Oauth認証のcallbackページ
+@app.route("/oauth/callback")
+def google_callback():
+    """
+
+    Google認証後、アクセストークンを取得しFirestoreに保存
+
+    Parameters
+    ----------
+        None
+
+    Returns
+    ----------
+        リダイレクトURL
+    
+    """
+
+    line_id = session.get("line_id")
+    if not line_id:
+        return redirect(f"https://line.me/R/ti/p/{Config.official_line_id}")
+
+    flow = Flow.from_client_secrets_file(
+        Config.credentials_path,
+        scopes=["https://www.googleapis.com/auth/calendar"],
+        redirect_uri=f"{request.root_url}{Config.google_oauth_callback_url}"
+    )
+
+    flow.fetch_token(authorization_response=request.url)
+
+    creds = flow.credentials
+
+    google_api = GoogleCalendarAPI(line_id, "")
+    google_api.updateToken({
+        "token": creds.token,
+        "refresh_token": creds.refresh_token,
+        "token_uri": creds.token_uri,
+        "client_id": creds.client_id,
+        "client_secret": creds.client_secret,
+        "scopes": creds.scopes
+    })
+
+    sendMessage_Handler(
+        [{
+            "type": "text",
+            "text": "Google Calendarの認証が完了しました"
+        }],
+        line_id = line_id
+    )
+
+    return redirect(f"https://line.me/R/ti/p/{Config.official_line_id}")
+
 
 @app.route("/callback", methods=["POST"])
 def callback():
@@ -44,59 +138,22 @@ def callback():
 
     return "OK", 200
 
+# Message受信イベント
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
     user_text = event.message.text
+    user_id = event.source.user_id
     
     replyList = receiveMessage_Handler(user_text)
-    result = sendMessage_Handler(replyList, event)
+    sendMessage_Handler(replyList, event)
 
-    return result
+# 友達追加イベント
+@handler.add(FollowEvent)
+def handle_follow(event):
+    line_id = event.source.user_id
+    replyList = follow_Handler(line_id, request.url_root)
 
-""" # 空き時間確認のエンドポイント
-@app.route('/available-times')
-def free_times():
-    # この週の空き時間を取得
-    free_slots = get_available_time(time_range="this_week") 
-    return jsonify(free_slots) """
-
-# ユーザデータを追加するエンドポイント
-@app.route('/add-user', methods=['POST'])
-def add_user_endpoint():
-    try:
-        # リクエストのJSONデータを取得
-        user_data = request.get_json()
-
-        # 必須フィールドのチェック
-        required_fields = ["line_id", "google_email", "access_token", "refresh_token", "token_expiry"]
-        if not all(field in user_data for field in required_fields):
-            return jsonify({"error": "Missing required fields"}), 400
-
-        # token_expiry を datetime に変換（文字列なら）
-        if isinstance(user_data["token_expiry"], str):
-            user_data["token_expiry"] = datetime.strptime(user_data["token_expiry"], "%Y-%m-%d")
-
-        # Firestore にデータを追加
-        response = add_user_data(user_data)
-        
-        return jsonify(response), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ユーザデータを取得するエンドポイント
-@app.route('/get-user/<line_id>', methods=['GET'])
-def get_user_endpoint(line_id):
-    try:
-        # Firestore からユーザデータを取得
-        user_data = get_user_data(line_id)
-        
-        if user_data:
-            return jsonify(user_data), 200
-        else:
-            return jsonify({"error": "User not found"}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    sendMessage_Handler(replyList, event)
 
 if __name__ == "__main__":
-    # Flask アプリをデバッグモードで実行
     app.run(debug=True)
