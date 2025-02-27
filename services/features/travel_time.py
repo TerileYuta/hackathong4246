@@ -1,6 +1,7 @@
-# モジュールとして扱うためのファイルimport requests
+# モジュールとして扱うためのファイル
 from bs4 import BeautifulSoup
 import re  # 追加
+import requests
 
 GOOGLE_API_KEY = "AIzaSyB-jnFU1PRHagvMFdUFtfejuCJRQYZCzgk"
 
@@ -97,36 +98,58 @@ def parse_time_to_minutes(time_str):
     
     return total_minutes
 
-# --- ユーザー入力 ---
-home_name = input("自宅（名称）を入力してください（例: 自宅, 渋谷, スタバ 渋谷）：")
-destination_name = input("目的地（名称）を入力してください（例: 会社, 東京タワー）：")
+def search_travel_time(message):
+    try:
+            home_name, destination_name = message.split("から")  # 「から」で分割して出発地と目的地を取得
+    except ValueError:
+        # 「から」区切りが正しくない場合、エラーメッセージを返す
+        return [
+            {
+                "type": "text",
+                "text": "経路の形式が正しくありません。例えば「渋谷から東京タワー」といった形式で入力してください。"
+            }
+        ]
 
-# --- 1. 自宅の最寄り駅を取得 ---
-home_station = get_nearest_station(home_name)
-if not home_station:
-    home_station = home_name  # 駅が見つからない場合、直接地名を使う
+    # 最寄り駅を取得する（新しい関数を使用）
+    home_station = get_nearest_station(home_name)  # 出発地の最寄り駅を取得
+    destination_station = get_nearest_station(destination_name)  # 目的地の最寄り駅を取得
 
-# --- 2. 目的地の最寄り駅を取得 ---
-destination_station = get_nearest_station(destination_name)
-if not destination_station:
-    destination_station = destination_name  # 同様に直接地名を使う
+    # 最寄り駅が見つからない場合、エラーメッセージを返す
+    if not home_station or not destination_station:
+        return [
+            {
+                "type": "text",
+                "text": "最寄り駅が見つかりませんでした。もう一度試してください。"
+            }
+        ]
 
-# --- 3. 自宅 → 最寄り駅（徒歩） ---
-home_to_station, walk1_time = get_walking_route(home_name, home_station)
+    # 徒歩経路と電車経路の計算を行う
+    home_to_station, walk1_time = get_walking_route(home_name, home_station)  # 出発地から最寄り駅までの徒歩時間を計算
+    transit_route, train_time = get_transit_route_yahoo(home_station, destination_station)  # 最寄り駅から目的地最寄り駅までの電車経路と所要時間を取得
+    station_to_destination, walk2_time = get_walking_route(destination_station, destination_name)  # 目的地最寄り駅から目的地までの徒歩時間を計算
 
-# --- 4. 最寄り駅 → 目的地の最寄り駅（電車: Yahoo!） ---
-transit_route, train_time = get_transit_route_yahoo(home_station, destination_station)
+    # 合計所要時間を計算
+    total_time = walk1_time + train_time + walk2_time
+    total_time_str = f"{total_time // 60}時間{total_time % 60}分" if total_time >= 60 else f"{total_time}分"  # 時間と分に変換
 
-# --- 5. 目的地の最寄り駅 → 目的地（徒歩） ---
-station_to_destination, walk2_time = get_walking_route(destination_station, destination_name)
+    # ユーザーに返すレスポンスを作成
+    response = [
+        {
+            "type": "text",
+            "text": f"自宅: {home_name}\n最寄り駅: {home_station}\n徒歩所要時間: {walk1_time}分"
+        },
+        {
+            "type": "text",
+            "text": f"目的地: {destination_name}\n最寄り駅: {destination_station}\n徒歩所要時間: {walk2_time}分"
+        },
+        {
+            "type": "text",
+            "text": f"電車経路: {transit_route}\n所要時間: {train_time}分"
+        },
+        {
+            "type": "text",
+            "text": f"合計所要時間: {total_time_str}"
+        }
+    ]
 
-# --- 6. 合計時間の計算 ---
-total_time = walk1_time + train_time + walk2_time
-total_time_str = f"{total_time // 60}時間{total_time % 60}分" if total_time >= 60 else f"{total_time}分"
-
-# --- 7. 結果の表示 ---
-print("\n=== 🚀 経路情報 ===")
-print(home_to_station)
-print(transit_route)
-print(station_to_destination)
-print(f"\n=== ⏳ 合計所要時間: {total_time_str} ===")
+    return response  # 作成したレスポンスを返す

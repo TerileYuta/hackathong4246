@@ -6,14 +6,15 @@ import pytz
 import datetime
 import dateparser
 from dateutil.relativedelta import relativedelta
-from services.google_calendar_api.calendar_api_connection import authenticate_google_calendar
+from services.google_calendar_api.calendar_api_connection import  GoogleCalendarAPI
 
 
-def get_available_time(time_range="tomorrow", specific_date=None, timezone="Asia/Tokyo"):
+def get_available_time(line_id, time_range="tomorrow", specific_date=None, timezone="Asia/Tokyo"):
     """
     指定された期間または日付の空き時間を Google カレンダーから取得する
     Parameters
     ----------
+        line_id(str) : LINEのユーザーID
         time_range(str) : 検索したい期間（例: "today", "tomorrow", "this_week", "next_month"）
         specific_date(str, optional) : 特定の日付（例: "2025-03-10"）
         timezone(str) : タイムゾーン（デフォルトは "Asia/Tokyo"）
@@ -21,7 +22,8 @@ def get_available_time(time_range="tomorrow", specific_date=None, timezone="Asia
     ----------
         list : 空き時間のリスト（例: ["2025-03-10 09:00 - 10:00", ...]）
     """
-    service = authenticate_google_calendar()
+    calendar_api = GoogleCalendarAPI(line_id)
+    service = calendar_api.calendar
     local_tz = pytz.timezone(timezone)
     now = datetime.datetime.now(local_tz)
     start_date, end_date = calculate_date_range(time_range, now, specific_date, local_tz)
@@ -116,11 +118,12 @@ def calculate_free_time_ranges(start_date, end_date, busy_times, local_tz):
     ]
 
 
-def search_available_time(user_message):
+def search_available_time(line_id, user_message):
     """
     メッセージを解析して、空き時間を検索
     Parameters
     ----------
+        line_id(str) : LINEのユーザーID
         user_message(str) : ユーザーからのメッセージ（例: "今週の空き時間を教えて"）
     Returns
     ----------
@@ -138,7 +141,7 @@ def search_available_time(user_message):
 
     for key, value in time_map.items():
         if key in user_message:
-            return "\n".join(get_available_time(time_range=value))
+            return "\n".join(get_available_time(line_id, time_range=value))
 
     match = re.search(r"(\d{1,2})月(\d{1,2})日|(\d{1,2})/(\d{1,2})", user_message)
     if match:
@@ -150,18 +153,21 @@ def search_available_time(user_message):
     return "日付や期間を指定してください。例: '今週', '明日', '3月10日'"
 
 
-def answer_available_time(message):
+def answer_available_time(event: dict):
     """
     受信したメッセージを分析し、リプライメッセージを作成する
     Parameters
     ----------
-        message(str) : ユーザーメッセージ
+        event (dict) : LINEメッセージイベント (userId, メッセージを含む)
     Returns
     ----------
-        dict : リプライメッセージに関する情報（LINEボット用の形式）
+        list : LINEボット用のリプライメッセージ（辞書のリスト）
     """
-        
-    result = search_available_time(message)
+    user_id = event.source.userId  # LINEのuserIdを取得
+    message = event.message.text  # ユーザーメッセージを取得
+
+    result = search_available_time(user_id, message)  # user_idを渡す
+
     if isinstance(result, str):  
         reply_text = f"空いている時間:\n {result}"
     else:

@@ -29,10 +29,12 @@ def home():
 @app.route("/callback", methods=["POST"])
 def callback():
     signature = request.headers.get("X-Line-Signature")
+    print(f"Received signature: {signature}")
     if signature is None:
         return "Missing Signature", 403
-
+    
     body = request.get_data(as_text=True)
+    print(f"Request body: {body}")
     
     try:
         handler.handle(body, signature)
@@ -46,9 +48,9 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
-    user_text = event.message.text
+    # user_text = event.message.text
     
-    replyList = receiveMessage_Handler(user_text)
+    replyList = receiveMessage_Handler(event)
     result = sendMessage_Handler(replyList, event)
 
     return result
@@ -80,6 +82,7 @@ def add_user_endpoint():
         response = add_user_data(user_data)
         
         return jsonify(response), 200
+    
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

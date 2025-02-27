@@ -101,4 +101,3 @@ def delete_user_data(user_id):
     # ユーザーデータを削除
     user_ref.delete()
     return {"message": f"ID {user_id} のユーザーデータが削除されました"}
-

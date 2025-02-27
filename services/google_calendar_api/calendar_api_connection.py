@@ -31,7 +31,7 @@ class GoogleCalendarAPI():
 
         self.line_id = line_id
         
-        token = self.getToken(self.line_id)
+        token = self.getToken()
 
         self.calendar = self.authenticate(token)
 
