@@ -8,7 +8,6 @@ import dateparser
 from dateutil.relativedelta import relativedelta
 from services.google_calendar_api.calendar_api_connection import  GoogleCalendarAPI
 
-
 def get_available_time(line_id, time_range="tomorrow", specific_date=None, timezone="Asia/Tokyo"):
     """
     指定された期間または日付の空き時間を Google カレンダーから取得する

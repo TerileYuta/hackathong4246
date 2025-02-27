@@ -1,7 +1,5 @@
 # services/google_calendar_api/calendar_api_connection.py
 
-import json
-
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -33,11 +31,12 @@ class GoogleCalendarAPI():
 
         """
 
-        self.SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+        self.SCOPES = ['https://www.googleapis.com/auth/calendar']
 
         self.line_id = line_id
         token = self.getToken()
         self.calendar = self.authenticate()
+        # self.root_url = root_url
 
     def getToken(self):
         """
@@ -47,7 +46,7 @@ class GoogleCalendarAPI():
         Parameters
         ----------
             None
-            
+
         Returns
         ----------
             dict : トークン等の情報
@@ -108,7 +107,6 @@ class GoogleCalendarAPI():
 
     def authenticate(self):
         """
-
         Google カレンダー API の認証を行い、認証済みのサービスオブジェクトを返す
         
         Parameters
@@ -127,17 +125,27 @@ class GoogleCalendarAPI():
         credentials_path = Config.credentials_path
 
         if token:
-            creds =  Credentials.from_authorized_user_info(token)
+            creds = Credentials.from_authorized_user_info(token)
         
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
-
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(credentials_path, self.SCOPES)
+                # The user needs to authenticate via OAuth
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    credentials_path,
+                    self.SCOPES,
+                    redirect_uri=f"{self.root_url}{Config.google_oauth_callback_url}"
+                )
+                authorization_url, _ = flow.authorization_url(
+                    access_type='offline',
+                    prompt='consent'
+                )
 
-                creds = flow.run_local_server(port=0)
+                # Return the authorization URL for the user to authenticate
+                return authorization_url
+        
+        # If credentials are valid, build the Google Calendar API service
+        self.service = build("calendar", "v3", credentials=creds)
 
-            self.updateToken(json.loads(creds.to_json()))
-    
-        return build("calendar", "v3", credentials=creds)
+        return self.service  # Return the service object
