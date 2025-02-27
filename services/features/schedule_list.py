@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from services.google_calendar_api import GoogleCalendarAPI
 from .schedule import Schedule
+from .parse_date import parse_date
 
 def get_events_for_date(date, line_id):
     """
@@ -67,44 +68,6 @@ def get_events_from_GcalenderAPI(time_min, time_max, line_id):
     ).execute()  
 
     return events_result.get('items', [])
-
-def parse_date(message):
-    """
-    メッセージから日付を解析する
-    Parameters
-    ----------
-        message(str) : ユーザーからのメッセージ（例: "3月1日", "今日", "明日"）
-    Returns
-    ----------
-        datetime : 解析された日付（無効な日付の場合はNone）
-    """
-    # "YYYY-MM-DD" フォーマットをチェック
-    try:
-        date = datetime.strptime(message.strip(), "%Y-%m-%d")
-        return date
-    except ValueError:
-        pass  # "YYYY-MM-DD" フォーマットでない場合は次のチェックへ
-
-    # "3月1日" のような日本語の日付フォーマットをチェック
-    month_day_pattern = r"(\d{1,2})月\s*(\d{1,2})日"
-    match = re.match(month_day_pattern, message.strip())
-    
-    if match:
-        month = int(match.group(1))
-        day = int(match.group(2))
-        current_year = datetime.now().year
-        date = datetime(current_year, month, day)
-        return date
-
-    # "今日" のチェック
-    if "今日" in message:
-        return datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-
-    # "明日" のチェック
-    elif "明日" in message:
-        return (datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1))
-    
-    return None
 
 def reply_events(event):
     """
