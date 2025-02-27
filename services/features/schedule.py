@@ -4,7 +4,9 @@ from datetime import datetime
 class Schedule:
     def __init__(self, line_id : str):
         calendar = GoogleCalendarAPI(line_id)
-        self.service = calendar.authenticate()
+        calendar.authenticate()
+        
+        self.service = calendar.service
 
     def add_event(self, summary: str, start_time: datetime, end_time: datetime, description: str = "", location: str = "",):
         """

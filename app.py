@@ -56,7 +56,7 @@ def google_login():
     auth_url = google_calendar_api.authenticate()
 
     if auth_url:
-        return redirect(f"https://line.me/R/ti/p/{Config.official_line_id}")
+        return redirect(auth_url)
     else:
         sendMessage_Handler(
             [{
