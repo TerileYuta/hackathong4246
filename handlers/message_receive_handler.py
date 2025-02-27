@@ -1,7 +1,7 @@
 import re
-from services.features.get_available_time import answer_available_time
-from services.features.travel_time import search_travel_time
-
+from services.features.get_available_time import reply_available_time
+from services.features.travel_time import reply_travel_time
+from services.features.schedule_list import reply_events
 
 def receiveMessage_Handler(event):
     """
@@ -16,12 +16,15 @@ def receiveMessage_Handler(event):
     text = event.message.text  # 受信したメッセージのテキストを取得
     user_id = event.source.userId  # ユーザーIDを取得
 
-    # メッセージに特定のキーワードが含まれている場合に空き時間を検索
+    # メッセージに特定のキーワードが含まれている場合に各機能を開始
     if "いつ" in text or "空いてる" in text:
-        return answer_available_time(event)  # イベントオブジェクトを渡して空き時間を回答
+        return reply_available_time(event)  # イベントオブジェクトを渡して空き時間を回答
 
     elif "経路" in text:  # ユーザーが経路を尋ねている場合
-        return search_travel_time(text)
+        return reply_travel_time(text)
+
+    elif "予定" in text: # 予定登録・予定確認
+        return reply_events(event)
 
     return [
         {

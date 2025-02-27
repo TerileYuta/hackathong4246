@@ -151,8 +151,7 @@ def search_available_time(line_id, user_message):
 
     return "日付や期間を指定してください。例: '今週', '明日', '3月10日'"
 
-
-def answer_available_time(event: dict):
+def reply_available_time(event: dict):
     """
     受信したメッセージを分析し、リプライメッセージを作成する
     Parameters

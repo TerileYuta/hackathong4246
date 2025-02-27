@@ -108,17 +108,19 @@ class GoogleCalendarAPI():
     def authenticate(self):
         """
         Google カレンダー API の認証を行い、認証済みのサービスオブジェクトを返す
-        
+
         Parameters
         ----------
             None
-        
+
         Returns
         ----------
             googleapiclient.discovery.Resource : 認証された Google カレンダー API サービスオブジェクト
-        
-        """
 
+        説明：
+        Google カレンダー API に認証するための関数です。トークンが有効であれば、認証情報を使用して Google カレンダー API のサービスオブジェクトを返します。
+        トークンが無効または期限切れの場合は、リフレッシュするか、OAuth 認証フローを開始して認証 URL を提供します。
+        """
         token = self.getToken()
         creds = None
 
@@ -131,7 +133,7 @@ class GoogleCalendarAPI():
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                # The user needs to authenticate via OAuth
+                # ユーザーが OAuth を通じて認証する必要がある場合
                 flow = InstalledAppFlow.from_client_secrets_file(
                     credentials_path,
                     self.SCOPES,
@@ -142,10 +144,10 @@ class GoogleCalendarAPI():
                     prompt='consent'
                 )
 
-                # Return the authorization URL for the user to authenticate
+                # ユーザーに認証 URL を返して認証を促す
                 return authorization_url
         
-        # If credentials are valid, build the Google Calendar API service
+        # 認証情報が有効な場合、Google カレンダー API サービスをビルド
         self.service = build("calendar", "v3", credentials=creds)
 
-        return self.service  # Return the service object
+        return self.service  # 認証されたサービスオブジェクトを返す
