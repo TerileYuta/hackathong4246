@@ -11,6 +11,19 @@ from ..firestore import db
 from config import Config
 
 class GoogleCalendarAPI():
+    """
+
+    calenderにアクセスするための認証情報に関連する処理行う。
+
+
+    Methods
+    ----------
+        getToken() : FireStoreからtokenを取得する
+        updateToken() : トークン情報を更新する
+        addUser() : ユーザーの新規作成
+        authenticate() : Google カレンダー API の認証を行い、認証済みのサービスオブジェクトを返す
+
+    """
     def __init__(self, line_id:str):
         """
         
@@ -18,22 +31,13 @@ class GoogleCalendarAPI():
         ----------
             line_id(str) : LINE ID
 
-        Methods
-        ----------
-            getToken() : FireStoreからtokenを取得する
-            updateToken() : トークン情報を更新する
-            addUser() : ユーザーの新規作成
-            authenticate() : Google カレンダー API の認証を行い、認証済みのサービスオブジェクトを返す
-
         """
 
         self.SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
         self.line_id = line_id
-        
         token = self.getToken()
-
-        self.calendar = self.authenticate(token)
+        self.calendar = self.authenticate()
 
     def getToken(self):
         """
@@ -42,8 +46,8 @@ class GoogleCalendarAPI():
 
         Parameters
         ----------
-            line_id(str) : LINE ID
-
+            None
+            
         Returns
         ----------
             dict : トークン等の情報
@@ -102,14 +106,14 @@ class GoogleCalendarAPI():
 
         db.collection("users").document(self.line_id).set(user)
 
-    def authenticate(self, token):
+    def authenticate(self):
         """
 
         Google カレンダー API の認証を行い、認証済みのサービスオブジェクトを返す
         
         Parameters
         ----------
-            token(str) : トークン情報
+            None
         
         Returns
         ----------
@@ -117,6 +121,7 @@ class GoogleCalendarAPI():
         
         """
 
+        token = self.getToken()
         creds = None
 
         credentials_path = Config.credentials_path
