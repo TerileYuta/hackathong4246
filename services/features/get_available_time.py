@@ -163,7 +163,17 @@ def search_available_time(line_id, user_message):
 
     for key, value in time_map.items():
         if key in user_message:
-            return "\n".join(get_available_time(line_id, time_range=value))
+            available_times = get_available_time(line_id, time_range=value)
+
+            # Flatten the list if there are nested lists and ensure all items are strings
+            available_times_flat = []
+            for item in available_times:
+                if isinstance(item, list):  # If the item is a list, flatten it
+                    available_times_flat.extend([str(subitem) for subitem in item if subitem != True])  # Avoid adding `True`
+                elif item != True:  # If the item is not `True`, add it to the list
+                    available_times_flat.append(str(item))
+
+            return "\n".join(available_times_flat)
 
     match = re.search(r"(\d{1,2})月(\d{1,2})日|(\d{1,2})/(\d{1,2})", user_message)
     if match:
@@ -192,9 +202,19 @@ def reply_available_time(message:str, line_id: str):
 
     result = search_available_time(line_id, message)  # user_idを渡す
 
+    # 結果が文字列の場合、そのまま使用する
     if isinstance(result, str):  
-        reply_text = f"空いている時間:\n {result}"
-    else:
-        reply_text = "空いている時間:\n" + "\n".join(result) if result else "指定された期間には空いていません。"
+        if result.strip():  # 文字列が空白だけでないことを確認
+            reply_text = f"空いている時間:\n {result}"
+        else:
+            reply_text = "指定された期間には空いていません。"
+
+    # 結果がリストの場合（空き時間）
+    elif isinstance(result, list):  
+        if result:  # リストが空でないことを確認
+            available_times_str = "\n".join(result)  # 空き時間を文字列として結合
+            reply_text = f"空いている時間:\n {available_times_str}"
+        else:
+            reply_text = "指定された期間には空いていません。"
 
     return [{"type": "text", "text": reply_text}]

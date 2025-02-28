@@ -2,6 +2,7 @@ import re
 from pytz import timezone
 from datetime import datetime, timedelta
 
+from config import Config
 from services.google_calendar_api import GoogleCalendarAPI
 from .parse_date import parse_date
 
@@ -60,9 +61,12 @@ def get_events_from_GcalenderAPI(time_min, time_max, line_id):
         list : 取得したイベントのリスト
     """
     calendar_api = GoogleCalendarAPI(line_id)
-    auth = calendar_api.authenticate()
-    if(auth):
-        return "認証エラー"
+    not_auth = calendar_api.authenticate()
+
+    # Oauth承認が必要になった場合
+    if not_auth:
+        return False, Config.auth_error_msg
+    
     service = calendar_api.calendar
 
     events_result = service.events().list(
@@ -85,7 +89,7 @@ def reply_events(event):
     ----------
         list : 返信するメッセージのリスト
     """
-    line_id = event.source.userId
+    line_id = event.source.user_id
     message = event.message.text
 
     # ユーザーが指定した日付に対してイベントを取得する
