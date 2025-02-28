@@ -183,38 +183,3 @@ def search_available_time(line_id, user_message):
         return "\n".join(get_available_time(specific_date=specific_date))
 
     return "日付や期間を指定してください。例: '今週', '明日', '3月10日'"
-
-def reply_available_time(message:str, line_id: str):
-    """
-
-    受信したメッセージを分析し、リプライメッセージを作成する
-
-    Parameters
-    ----------
-        message(str) : ユーザーメッセージ
-        line_id(str) : LINE ID
-
-    Returns
-    ----------
-        list : LINEボット用のリプライメッセージ(辞書のリスト)
-
-    """
-
-    result = search_available_time(line_id, message)  # user_idを渡す
-
-    # 結果が文字列の場合、そのまま使用する
-    if isinstance(result, str):  
-        if result.strip():  # 文字列が空白だけでないことを確認
-            reply_text = f"空いている時間:\n {result}"
-        else:
-            reply_text = "指定された期間には空いていません。"
-
-    # 結果がリストの場合（空き時間）
-    elif isinstance(result, list):  
-        if result:  # リストが空でないことを確認
-            available_times_str = "\n".join(result)  # 空き時間を文字列として結合
-            reply_text = f"空いている時間:\n {available_times_str}"
-        else:
-            reply_text = "指定された期間には空いていません。"
-
-    return [{"type": "text", "text": reply_text}]

@@ -1,5 +1,13 @@
 # hackathong4246
 
+## 技術スタック
+
+- フレームワーク：Flask
+- データベース: Firestore
+- API: Google Calendar API, Google Maps API, OpenWeatherMap
+- AI: LangGraph(gpt-4o)
+
+
 ## 環境構築方法
 
 ``` cmd
@@ -19,51 +27,71 @@ pip install -r requirements.txt
 
 ## フォルダ構成
 
-スケジュール登録機能などはservices/featuresフォルダに作成する
+```
 
-(ex:./hackathong4246/services/features/schedule.py)
-
-``` 
 hackathong4246
-│   .env                                 # 環境変数
-│   app.py                               # メインファイル（Flaskアプリケーション）
-│   config.py                            # 設定ファイル（リクエスト上限数、予定取得上限数など）
+│   .env
+│   .gitignore
+│   app.py
 │   README.md
-│   requirements.txt                     # 必要なライブラリのテスト
-│   
-├───handlers                             # メッセージの送受信関連処理
-│   │   message_receive_handler.py       # メッセージの受信関連処理
-│   │   message_send_handler.py          # メッセージの送信関連処理
+│   requirements.txt
+│
+├───config
+│   │   config.py
 │   │   __init__.py
 │   │
-│   ├───JSON                             # メッセージ送信時のJSONファイルの雛形
-│   │       message.json
+│   ├───firebase
+│   │       firebase-key.json
 │   │
-│   ├───langchain                        # AIベースのメッセージの分析
+│   └───GoogleCalenderAPI
+│           credentials.json
+│
+├───handlers
+│   │   event_hadler.py
+│   │   lineProfile.py
+│   │   message_receive_handler.py
+│   │   message_send_handler.py
+│   │   personalkey.py
+│   │   __init__.py
+│   │
+│   ├───langgraph
+│   │   │   model.py
+│   │   │   openai_api.py
+│   │   │   ReAct.py
+│   │   │   tools.py
 │   │   │   __init__.py
 │   │   │
-│   │   └───prompts                      # プロンプトエンジニアリング
-│   └───rule                             # ルールベースのメッセージ分析
+│   │   └───prompts
+│   │           tool_selector.txt
+│   │
+│   └───rule
+│           rule.py
 │           __init__.py
 │
-├───services                             # 機能やAPI関連
-│   │   __init__.py
+├───services
+│   ├───features
+│   │       get_available_time.py
+│   │       schedule.py
+│   │       schedule_list.py
+│   │       travel_time.py
+│   │       weather.py
 │   │
-│   ├───features                         # 機能
+│   ├───firestore
+│   │       firestore_connection.py
 │   │       __init__.py
 │   │
-│   ├───firestore                        # API(DB)
-│   │       __init__.py
-│   │
-│   ├───google_calendar_api              # API(Google Calendar API)
-│   │       __init__.py
-│   │
-│   └───google_map_api                   # API(Google Maps API)
+│   └───google_calendar_api
+│           calendar_api_connection.py
 │           __init__.py
 │
-└───utils                                # ユーティリティ関数
-        __init__.py
-        
+├───test
+│       test.py
+│
+└───utils
+        env.py
+        text.py
+
+
 ```
 
 ## ブランチルール

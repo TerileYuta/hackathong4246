@@ -22,7 +22,7 @@ def call_model(messages: str):
 
     Returns
     ----------
-        AIレスポンス
+        LLMレスポンス
 
     """
 
@@ -55,9 +55,12 @@ def call_tool(tool_call, line_ids, user_names):
             tool_call["args"]["line_id"] = line_id
 
         tool = tools_by_name[tool_call["name"]]
-        success, result = tool.invoke(tool_call["args"])
+        is_success, result = tool.invoke(tool_call["args"])
 
-        results[user_names[index]] = result
+        if(is_success):
+            results[user_names[index]] = f"正常に処理されました。\n処理結果：{result}"
+        else:
+            results[user_names[index]] = f"処理中にエラーが発生しました。\nエラー内容：{result}"
 
     return ToolMessage(content = str(results), tool_call_id = tool_call["id"])
 

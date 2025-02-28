@@ -1,6 +1,6 @@
 import secrets
 
-from flask import Flask, jsonify, request, redirect, session
+from flask import Flask, request, redirect, session
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from linebot.v3.webhook import WebhookHandler
@@ -17,6 +17,7 @@ from config import Config
 from services.google_calendar_api import GoogleCalendarAPI
 from utils.env import get_env
 
+
 LINE_CHANNEL_SECRET = get_env('LINE_CHANNEL_SECRET')
 
 # Webhookの署名を検証するハンドラー
@@ -24,7 +25,7 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32) 
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1) # https接続
 
 # Oauth認証用ページ
 @app.route('/oauth')
@@ -151,6 +152,7 @@ def handle_follow(event):
 
     sendMessage_Handler(replyList, event)
 
+# グループ追加イベント
 @handler.add(JoinEvent)
 def handle_join(event):
     group_id = event.source.group_id
@@ -160,4 +162,4 @@ def handle_join(event):
     sendMessage_Handler(replyList, event)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(port=5000)

@@ -21,6 +21,7 @@ def get_events_for_date(date, line_id):
         list : 取得したイベントのリスト
 
     """
+
     if not date:
         return "無効な日付です。もう一度試してください。"
     
@@ -50,15 +51,19 @@ def get_events_for_date(date, line_id):
 
 def get_events_from_GcalenderAPI(time_min, time_max, line_id):
     """
+
     GoogleカレンダーAPIから指定された期間のイベントを取得する
+    
     Parameters
     ----------
         time_min(str) : 開始時刻（ISO 8601形式）
         time_max(str) : 終了時刻（ISO 8601形式）
         line_id(str) : ユーザーのLINE ID
+    
     Returns
     ----------
         list : 取得したイベントのリスト
+    
     """
     calendar_api = GoogleCalendarAPI(line_id)
     not_auth = calendar_api.authenticate()
@@ -78,53 +83,3 @@ def get_events_from_GcalenderAPI(time_min, time_max, line_id):
     ).execute()  
 
     return events_result.get('items', [])
-
-def reply_events(event):
-    """
-    ユーザーが指定した日付に基づいてイベントの詳細を返信する
-    Parameters
-    ----------
-        event(object) : LINEイベントオブジェクト（ユーザーからのメッセージを含む）
-    Returns
-    ----------
-        list : 返信するメッセージのリスト
-    """
-    line_id = event.source.user_id
-    message = event.message.text
-
-    # ユーザーが指定した日付に対してイベントを取得する
-    date = parse_date(message)
-
-    if date:
-        try:
-            events = get_events_for_date(date, line_id)
-
-            if isinstance(events, list) and events:  # イベントが見つかった場合
-                event_details = []
-                for event in events:
-                    start = event.get('start', {})
-                    end = event.get('end', {})
-
-                    if 'dateTime' in start:
-                        event_start = start['dateTime']
-                        event_end = end.get('dateTime', 'No end time available')
-                    else:
-                        event_start = start.get('date', 'No start date available')
-                        event_end = end.get('date', 'No end date available')
-
-                    event_details.append(f"イベント: {event['summary']}\n"
-                                         f"開始: {event_start}\n"
-                                         f"終了: {event_end}\n"
-                                         f"場所: {event.get('location', '未設定')}\n"
-                                         f"参加者: {', '.join([attendee.get('email', '') for attendee in event.get('attendees', [])]) or 'なし'}\n")
-
-                reply_text = "以下のイベントがあります:\n\n" + "\n\n".join(event_details)
-            else:
-                reply_text = "指定された期間にはイベントがありません。"
-
-        except Exception as e:
-            reply_text = "イベントの取得中にエラーが発生しました。"
-    else:
-        reply_text = "無効な日付です。もう一度試してください。"
-
-    return [{"type": "text", "text": reply_text}]

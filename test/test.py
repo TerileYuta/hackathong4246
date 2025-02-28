@@ -13,7 +13,7 @@ class DummyMessage:
 
 class DummySource:
     def __init__(self, user_id):
-        self.group_id = user_id 
+        self.user_id = user_id 
 
 class DummyEvent:
     def __init__(self, text, user_id):
@@ -24,8 +24,10 @@ debug = True
 
 while(True):
     user_message = input("あなた：")
+
     user_id = "Ub739949d145420a47dd6b6b4a748b630"
     event = DummyEvent(user_message, user_id)    
+    
     replyList = receiveMessage_Handler(event)
     result = sendMessage_Handler(replyList, None, True)
 

@@ -56,6 +56,10 @@ def addNewGrop(group_id):
     
     グループIDのドキュメントを作る
 
+    Parameters
+    ----------
+        group_id(str) : グループID
+
     """
 
     doc_ref = db.collection("groups").document(group_id)

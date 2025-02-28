@@ -8,6 +8,7 @@ from langgraph.prebuilt import ToolNode
 from services.features.schedule import add_event, update_event, delete_event, getEvents
 from services.features.weather import get_weather
 from services.features.get_available_time import get_available_time
+from services.features.travel_time import getRoute
 
 class addEventArgs(BaseModel):
     line_id: str
@@ -45,11 +46,11 @@ class get_weatherArgs(BaseModel):
     city: str
     dt:datetime
 
-def askUser():
-    return True, "Think about what you would like to confirm or ask the user."
-
-def confirmUser():
-    return True, "Ask the user to confirm that the process is correct before executing the function"
+class getRouteArgs(BaseModel):
+    from_place: str
+    to_place: str
+    query_time: datetime
+    type: str = "出発"
 
 tool_list = [
     StructuredTool.from_function(
@@ -92,6 +93,13 @@ tool_list = [
         func = get_weather,
         args_schema = get_weatherArgs,
         description = "Once you specify the area, date and time, you can get the weather there.",
+    ),
+
+    StructuredTool.from_function(
+        name = "getRoute",
+        func = getRoute,
+        args_schema = getRouteArgs,
+        description = "You can obtain the route and time required to reach the destination.",
     ),
 ]
 

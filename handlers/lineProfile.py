@@ -24,6 +24,7 @@ def get_user_display_name(user_id:str):
         str: ユーザーネーム
 
     """
+    
     try:
         profile = messaging_api.get_profile(user_id)
         return profile.display_name

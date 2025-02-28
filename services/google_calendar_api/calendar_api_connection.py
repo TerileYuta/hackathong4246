@@ -74,6 +74,7 @@ class GoogleCalendarAPI():
             None
 
         """
+
         user_ref = db.collection("users").document(self.line_id)
         user_ref.update(token)
 
@@ -105,6 +106,7 @@ class GoogleCalendarAPI():
 
     def authenticate(self):
         """
+        
         Google カレンダー API の認証を行い、認証済みのサービスオブジェクトを返す
 
         Parameters
@@ -118,6 +120,7 @@ class GoogleCalendarAPI():
         説明：
         Google カレンダー API に認証するための関数です。トークンが有効であれば、認証情報を使用して Google カレンダー API のサービスオブジェクトを返します。
         トークンが無効または期限切れの場合は、リフレッシュするか、OAuth 認証フローを開始して認証 URL を提供します。
+
         """
         token = self.getToken()
         creds = None

@@ -117,6 +117,10 @@ def delete_event(line_id, event_id):
         line_id(str) : LINE ID
         event_id (str): 削除するイベントのID
 
+    Returns
+    ---------
+        event
+
     """
 
     calendar = GoogleCalendarAPI(line_id)
@@ -166,16 +170,6 @@ def getEvents(line_id:str, start_datetime:datetime, end_datetime:datetime):
     service = calendar.calendar
 
     jst = timezone('Asia/Tokyo')  # 日本時間のタイムゾーンを指定
-    """
-    # 日本時間 (Asia/Tokyo) を設定
-    
-    # 指定した日付を datetime オブジェクトに変換
-    date_dt = datetime.strptime(date, '%Y-%m-%d')  # 入力された日付文字列を datetime オブジェクトに変換
-
-    # 検索する範囲を timeMin と timeMax に設定（指定した日付の 00:00:00 と 23:59:59）
-    time_min = date_dt.replace(tzinfo=jst).isoformat()  # 開始日時を 00:00:00 に設定し、ISO 8601 形式に変換
-    time_max = (date_dt.replace(tzinfo=jst) + timedelta(days=1)).isoformat()  # 終了日時を 23:59:59 に設定（+1日して 23:59:59 に）
-    """
 
     if start_datetime.tzinfo is None:
         start_datetime =jst.localize(start_datetime)

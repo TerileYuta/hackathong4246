@@ -1,4 +1,4 @@
 __pycache__/
-*.pyc
-*.json
-.DS_Store
+config/firebase/
+config/GoogleCalenderAPI/
+.env

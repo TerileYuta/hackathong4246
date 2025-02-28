@@ -12,3 +12,5 @@ class ConfigClass:
         self.google_oauth_callback_url = "oauth/callback"
 
         self.auth_error_msg = "Authentication error"
+
+        self.llm_model = "gpt-4o"

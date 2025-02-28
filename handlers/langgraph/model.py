@@ -20,6 +20,19 @@ class Model:
         self.user_names = user_names
 
     def invoke(self, message:str):
+        """
+        
+        モデルの推論開始
+
+        Parameters
+        ----------
+            message(str) : ユーザークエリー
+
+        Returns
+        ----------
+            str : モデル推論結果
+
+        """
         system_message = {"role": "system", "content" : self.system_prompt}
         user_message = {"role": "user", "content": message}
 
