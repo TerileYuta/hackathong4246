@@ -4,14 +4,14 @@ from flask import Flask, jsonify, request, redirect, session
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from linebot.v3.webhook import WebhookHandler
-from linebot.v3.webhooks import MessageEvent, TextMessageContent, FollowEvent
+from linebot.v3.webhooks import MessageEvent, TextMessageContent, FollowEvent, JoinEvent
 from linebot.v3.exceptions import InvalidSignatureError
 
 from google_auth_oauthlib.flow import Flow
 
 from handlers import receiveMessage_Handler
 from handlers import sendMessage_Handler
-from handlers import follow_Handler
+from handlers import follow_Handler, join_Handler
 
 from config import Config
 from services.google_calendar_api import GoogleCalendarAPI
@@ -139,8 +139,7 @@ def callback():
 
 # Message受信イベント
 @handler.add(MessageEvent, message=TextMessageContent)
-def handle_message(event):
-    
+def handle_message(event):    
     replyList = receiveMessage_Handler(event)
     sendMessage_Handler(replyList, event)
 
@@ -149,6 +148,14 @@ def handle_message(event):
 def handle_follow(event):
     line_id = event.source.user_id
     replyList = follow_Handler(line_id, request.url_root)
+
+    sendMessage_Handler(replyList, event)
+
+@handler.add(JoinEvent)
+def handle_join(event):
+    group_id = event.source.group_id
+
+    replyList = join_Handler(group_id)
 
     sendMessage_Handler(replyList, event)
 

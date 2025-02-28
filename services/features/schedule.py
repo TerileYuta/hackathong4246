@@ -158,9 +158,11 @@ def getEvents(line_id:str, start_datetime:datetime, end_datetime:datetime):
     calendar = GoogleCalendarAPI(line_id)
     auth = calendar.authenticate()
 
+    # 認証に失敗した場合
     if auth:
         return False, Config.auth_error_msg
     
+    # 認証に成功した場合
     service = calendar.calendar
 
     jst = timezone('Asia/Tokyo')  # 日本時間のタイムゾーンを指定

@@ -1,3 +1,5 @@
+from .personalkey import addNewGrop
+
 def follow_Handler(line_id : str, root_url):
     """
     
@@ -13,6 +15,7 @@ def follow_Handler(line_id : str, root_url):
         list : ユーザーへの送信内容
 
     """
+
     messages = [{
         "type" : "text",
         "text" : "友だち登録ありがとうございます！"
@@ -30,3 +33,25 @@ def follow_Handler(line_id : str, root_url):
     })
 
     return messages
+
+def join_Handler(group_id:str):
+    """
+    
+    アカウントがグループに追加された際の処理
+
+    Paramters
+    ---------
+        group_id(str) : グループのID
+
+    Returns
+    ---------
+        list : グループへの送信内容
+
+    """
+    
+    addNewGrop(group_id)
+
+    return [{
+        "type": "text",
+        "text": "グループ追加ありがとうございます！\n現在、グループでは個人を識別することができません。そのため個人識別キーの送信をお願いします。\nなお、個人識別キーは公式アカウントのトーク画面で「個人識別キー」とご送信ください。"
+    }]

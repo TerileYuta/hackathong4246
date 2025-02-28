@@ -31,7 +31,7 @@ def call_model(messages: str):
     return response
 
 @task
-def call_tool(tool_call, line_id):
+def call_tool(tool_call, line_ids, user_names):
     """
     
     toolの呼び出しを行う
@@ -39,7 +39,8 @@ def call_tool(tool_call, line_id):
     Parameters
     ----------
         tool_call : 呼び出されたツールのリスト
-        line_id : LINE ID
+        line_ids : LINE IDのリスト
+        user_names : ユーザーネームのリスト
 
     Returns
     ----------
@@ -47,16 +48,35 @@ def call_tool(tool_call, line_id):
 
     """
 
+    results = {}
 
-    if("line_id" in tool_call["args"]):
-        tool_call["args"]["line_id"] = line_id
+    for index, line_id in enumerate(line_ids):
+        if("line_id" in tool_call["args"]):
+            tool_call["args"]["line_id"] = line_id
 
-    tool = tools_by_name[tool_call["name"]]
-    success, result = tool.invoke(tool_call["args"])
+        tool = tools_by_name[tool_call["name"]]
+        success, result = tool.invoke(tool_call["args"])
 
-    return ToolMessage(content = str(result), tool_call_id = tool_call["id"])
+        results[user_names[index]] = result
 
-def model_invoke(messages, line_id):
+    return ToolMessage(content = str(results), tool_call_id = tool_call["id"])
+
+def model_invoke(messages, line_ids, user_names):
+    """
+    
+    ReActによる推論
+
+    Parameters
+    ----------
+        messages(list) : クエリー
+        line_ids(list) : LINE IDのリスト
+        user_names(list) : ユーザーネームのリスト
+
+    Returns
+    ----------
+        str : 推論結果
+
+    """
     config = {"configurable": {"thread_id": "1"}}
     
     @entrypoint(checkpointer=checkpointer)
@@ -74,7 +94,7 @@ def model_invoke(messages, line_id):
                 break
 
             tool_result_futures = [
-                call_tool(tool_call, line_id) for tool_call in llm_response.tool_calls
+                call_tool(tool_call, line_ids, user_names) for tool_call in llm_response.tool_calls
             ]
 
             # TODO Google認証失敗時の挙動を設定する
@@ -82,8 +102,7 @@ def model_invoke(messages, line_id):
             tool_results = [fut.result() for fut in tool_result_futures]
 
             # Append to message list
-            messages = add_messages(messages, [llm_response, *tool_results])
-            
+            messages = add_messages(messages, [llm_response, *tool_results])            
 
             # Call model again
             llm_response = call_model(messages).result()

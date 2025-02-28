@@ -48,6 +48,9 @@ class get_weatherArgs(BaseModel):
 def askUser():
     return True, "Think about what you would like to confirm or ask the user."
 
+def confirmUser():
+    return True, "Ask the user to confirm that the process is correct before executing the function"
+
 tool_list = [
     StructuredTool.from_function(
         name = "addEvent",
@@ -82,13 +85,6 @@ tool_list = [
         func = get_available_time,
         args_schema = get_available_timeArgs,
         description = "Get the calendar for available times.time_rage=today,tomorrow,this_week,next_week,this_month,next_month",
-    ),
-
-    StructuredTool.from_function(
-        name = "askUser",
-        func = askUser,
-        args_schema = None,
-        description = "If the information from the current user alone is too vague to process, additional questions can be asked of the user.",
     ),
 
     StructuredTool.from_function(

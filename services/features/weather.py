@@ -1,20 +1,25 @@
 import re
 import requests
-import datetime
+from datetime import datetime
 from .parse_date import parse_date
+import pytz
 
-def get_weather(city, dt):
+def get_weather(city:str, dt:datetime):
     """
+    
     指定された都市と日時に基づいて天気予報を取得する
+
     Parameters
     ----------
         city(str) : 都市名
-        dt(str) : 調べたい日時（YYYY-MM-DD HH:MM形式）
+        dt(datetime) : 調べたい日時（YYYY-MM-DD HH:MM形式）
         
     Returns
     ----------
         dict : 天気と気温の情報（エラーがあればエラーメッセージ）
+
     """
+
     API_KEY = "f876f83f4fdae211dfb31f2cd260d9aa"  # OpenWeatherMapのAPIキーを入力
     URL = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={API_KEY}&units=metric&lang=ja"
 
@@ -22,35 +27,42 @@ def get_weather(city, dt):
     response = requests.get(URL)
     data = response.json()
 
+    japan_tz = pytz.timezone('Asia/Tokyo')
+    dt = dt.replace(tzinfo=pytz.utc).astimezone(japan_tz)
+    print(dt)
+
     # エラーハンドリング
     if response.status_code != 200:
         return {"error": f"APIリクエスト失敗: {data}"}
 
     # 入力日時をdatetime形式に変換
-    input_dt = datetime.datetime.strptime(dt, "%Y-%m-%d %H:%M")
+    #input_dt = datetime.datetime.strptime(dt, "%Y-%m-%d %H:%M")
 
     # 予報データを datetime 形式で取得
     forecast_data = []
     for forecast in data["list"]:
-        forecast_time = datetime.datetime.strptime(forecast["dt_txt"], "%Y-%m-%d %H:%M:%S")
+        forecast_time = japan_tz.localize(datetime.strptime(forecast["dt_txt"], "%Y-%m-%d %H:%M:%S",))
+        
         weather = forecast["weather"][0]["description"]
         temp = forecast["main"]["temp"]
+        
         forecast_data.append((forecast_time, weather, temp))
 
     # 未来のデータがない場合
-    if input_dt > forecast_data[-1][0]:
-        return {"error": f"未来すぎて予報データがありません: {dt}"}
+    if dt > forecast_data[-1][0]:
+        return {"error": f"予報データがありません: {dt}"}
 
     # 指定日時に最も近いデータを探す
-    nearest_forecast = min(forecast_data, key=lambda x: abs(x[0] - input_dt))
+    nearest_forecast = min(forecast_data, key=lambda x: abs(x[0] - dt))
 
-    return {
+    return True, {
         "weather": nearest_forecast[1],
         "temp": nearest_forecast[2]
     }
 
 def reply_weather(text, user_id, state):
     """
+
     メッセージと状態に基づいて天気の問い合わせを処理する
     
     Parameters
@@ -62,6 +74,7 @@ def reply_weather(text, user_id, state):
     Returns
     ----------
         list : リプライメッセージのリスト
+
     """
     from handlers.message_receive_handler import update_user_state, get_user_state
 

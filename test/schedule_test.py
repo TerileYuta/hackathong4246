@@ -4,8 +4,7 @@ import sys
 # 親ディレクトリをパスに追加
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from services.features.schedule import getEvents
+from services.features.weather import get_weather
 from datetime import datetime
 
-
-print(getEvents("lineID", datetime(2025,1,7,0,0,0), datetime(2025,1,7,23,59,59)))
+print(get_weather("長野県", datetime(2025, 3, 1, 15, 0, 0)))

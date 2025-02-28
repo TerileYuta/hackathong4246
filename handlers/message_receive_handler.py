@@ -9,6 +9,10 @@ from services.features.weather import reply_weather
 
 from .langgraph import Model
 
+from .lineProfile import get_user_display_name
+
+from .personalkey import savePersonalKey, getMembersId
+
 # ユーザーの状態を格納する辞書またはデータベースを想定
 user_states = {}
 
@@ -63,12 +67,32 @@ def receiveMessage_Handler(event):
     #TODO : DB移行後state関連処理はstateフォルダのstate.pyに移動
 
     message = event.message.text  # 受信したメッセージのテキストを取得
-    line_id = event.source.line_id  # ユーザーIDを取得
+    line_ids = []
+
+    if hasattr(event.source, "group_id"): # グループ
+        group_id = event.source.group_id
+        print(group_id)
+        line_ids = getMembersId(group_id)
+
+        # groupIDからline IDを取得する処理
+    elif hasattr(event.source, "room_id"): # 複数人トークルーム
+        room_id = event.source.room_id
+        
+        # groupIDからline IDを取得する処理
+    elif hasattr(event.source, "user_id"): # 個人
+        line_ids = [event.source.user_id]
+    else:
+        sender_type = "不明"
+        line_ids = "N/A"
+
+    user_names = [get_user_display_name(line_id) for line_id in line_ids]
 
     # ユーザーの現在の状態を取得
-    state_data = get_user_state(line_id)
+    """
+    state_data = get_user_state(line_ids)
     state = state_data['state'] if state_data else None
     context = state_data['context'] if state_data else None
+    """
 
     #TODO : DB移行後下記ルールベース関連処理はrurleフォルダのrurle.pyに移動
 
@@ -103,10 +127,35 @@ def receiveMessage_Handler(event):
 
     """
 
-    #LLLM推論部
-    """
+    # TODO グループでも送られてしまう問題あり
+    if message == "個人識別キー":
+        return [
+            {
+                "type": "text",
+                "text": f"{user_names[0]}の個人識別キーは下記になります。下記をそのままコピーしてグループに送信してください。"
+            },
+            {
+                "type": "text",
+                "text": f"Personal Identification Key : {line_ids[0]}"
+            },
+        ]
+    
+    # 個人識別キーの登録処理
+    match = re.search(r"Personal Identification Key\s*:\s*(\S+)", message)
 
-    model = Model(line_id)
+    if match:
+        key = match.group(1)
+        savePersonalKey(group_id, key)
+
+        return [
+            {
+                "type": "text",
+                "text": "グループに紐づけられました"
+            }
+        ]
+
+    #LLLM推論部
+    model = Model(line_ids, user_names)
     model_output = model.invoke(message)
 
     return [
@@ -115,5 +164,5 @@ def receiveMessage_Handler(event):
             "text" : model_output
         }    
     ]
-    """
+
 

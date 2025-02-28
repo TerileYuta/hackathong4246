@@ -6,7 +6,21 @@ import requests
 GOOGLE_API_KEY = "AIzaSyB-jnFU1PRHagvMFdUFtfejuCJRQYZCzgk"
 
 def get_latlng_from_place(place_name):
-    """Google Geocoding API で地名から緯度経度を取得"""
+    """
+    
+    Google Geocoding API で地名から緯度経度を取得
+    
+    Parameters
+    ----------
+        palce_name(str) : 地名
+
+    
+    Returns
+    ----------
+        str : 緯度、軽度
+
+    """
+
     url = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {
         "address": place_name,
@@ -14,6 +28,7 @@ def get_latlng_from_place(place_name):
         "language": "ja",
         "region": "JP"  # 日本に限定
     }
+
     response = requests.get(url, params=params)
     data = response.json()
 
@@ -25,7 +40,19 @@ def get_latlng_from_place(place_name):
         return None
 
 def get_nearest_station(place_name):
-    """Google Places API を使って、指定した場所の最寄り駅を段階的な半径で検索し、見つかれば返す。"""
+    """
+    
+    Google Places API を使って、指定した場所の最寄り駅を段階的な半径で検索し、見つかれば返す。
+    
+    Parameters
+    ----------
+        place_name(str) : 地名
+
+    Returns
+    ----------
+        str : 最も近い駅名
+
+    """
     latlng = get_latlng_from_place(place_name)
     if not latlng:
         return None  # 座標が取得できない場合、最寄り駅検索をスキップ
@@ -51,7 +78,20 @@ def get_nearest_station(place_name):
     return None
 
 def get_transit_route_yahoo(from_station, to_station):
-    """Yahoo! 乗換案内をスクレイピングして経路情報を取得"""
+    """
+    
+    Yahoo! 乗換案内をスクレイピングして経路情報を取得
+    
+    Parameters
+    ----------
+        from_station(str) : 出発地
+        to_station(str) : 到着地
+
+    Returns
+    ----------  
+        str : 経路情報
+
+    """
     url = f"https://transit.yahoo.co.jp/search/print?from={from_station}&to={to_station}"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -67,7 +107,20 @@ def get_transit_route_yahoo(from_station, to_station):
     return f"🚆 {from_station} → {to_station}: {required_time}（乗換: {transfer_count}） 料金: {fare}", parse_time_to_minutes(required_time)
 
 def get_walking_route(from_place, to_place):
-    """Google Directions API を使って徒歩経路を取得"""
+    """
+    
+    Google Directions API を使って徒歩経路を取得
+    
+    Parameters
+    ----------
+        from_place(str) : 出発地
+        to_place(str) : 到着地
+
+    Returns
+    ---------
+        str : 徒歩経路
+
+    """
     url = "https://maps.googleapis.com/maps/api/directions/json"
     params = {
         "origin": from_place,
@@ -86,7 +139,20 @@ def get_walking_route(from_place, to_place):
         return "⚠ 徒歩経路が見つかりません", 0
 
 def parse_time_to_minutes(time_str):
-    """「〇時間△分」を分に変換する関数"""
+    """
+    
+    「〇時間△分」を分に変換する関数
+    
+    Paramters
+    ---------
+        time_str(str) : 時間
+
+    Returns
+    ---------
+        
+
+    """
+    
     hours = re.search(r"(\d+)時間", time_str)
     minutes = re.search(r"(\d+)分", time_str)
 
