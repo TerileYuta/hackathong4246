@@ -14,9 +14,7 @@ from handlers import sendMessage_Handler
 from handlers import follow_Handler
 
 from config import Config
-
 from services.google_calendar_api import GoogleCalendarAPI
-
 from utils.env import get_env
 
 LINE_CHANNEL_SECRET = get_env('LINE_CHANNEL_SECRET')
@@ -119,10 +117,9 @@ def google_callback():
 
     return redirect(f"https://line.me/R/ti/p/{Config.official_line_id}")
 
-
 @app.route("/callback", methods=["POST"])
 def callback():
-    signature = request.headers.get("X-Line-Signature")
+    signature = request.headers.get('X-Line-Signature', '')
     print(f"Received signature: {signature}")
     if signature is None:
         return "Missing Signature", 403

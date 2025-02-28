@@ -174,25 +174,23 @@ def search_available_time(line_id, user_message):
 
     return "日付や期間を指定してください。例: '今週', '明日', '3月10日'"
 
-
-def answer_available_time(event: dict):
+def reply_available_time(message:str, line_id: str):
     """
 
     受信したメッセージを分析し、リプライメッセージを作成する
 
     Parameters
     ----------
-        event (dict) : LINEメッセージイベント (userId, メッセージを含む)
+        message(str) : ユーザーメッセージ
+        line_id(str) : LINE ID
 
     Returns
     ----------
         list : LINEボット用のリプライメッセージ(辞書のリスト)
 
     """
-    user_id = event.source.userId  # LINEのuserIdを取得
-    message = event.message.text  # ユーザーメッセージを取得
 
-    result = search_available_time(user_id, message)  # user_idを渡す
+    result = search_available_time(line_id, message)  # user_idを渡す
 
     if isinstance(result, str):  
         reply_text = f"空いている時間:\n {result}"

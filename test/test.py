@@ -13,7 +13,7 @@ class DummyMessage:
 
 class DummySource:
     def __init__(self, user_id):
-        self.userId = user_id 
+        self.user_id = user_id 
 
 class DummyEvent:
     def __init__(self, text, user_id):

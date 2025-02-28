@@ -98,7 +98,7 @@ def parse_time_to_minutes(time_str):
     
     return total_minutes
 
-def search_travel_time(message):
+def reply_travel_time(message):
     try:
             home_name, destination_name = message.split("から")  # 「から」で分割して出発地と目的地を取得
     except ValueError:

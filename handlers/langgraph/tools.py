@@ -6,7 +6,7 @@ from langchain.tools import StructuredTool
 from langgraph.prebuilt import ToolNode
 
 from services.features.schedule import add_event, update_event, delete_event, getEvents
-from services.weather import get_weather
+from services.features.weather import get_weather
 from services.features.get_available_time import get_available_time
 
 class addEventArgs(BaseModel):

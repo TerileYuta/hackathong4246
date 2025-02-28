@@ -1,0 +1,1 @@
+from .rule import analyze_message
