@@ -50,6 +50,7 @@ boltons @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/boltons_
 botocore @ file:///C:/b/abs_0dkeqep0ox/croot/botocore_1714460586193/work
 Bottleneck @ file:///C:/b/abs_f7un855idq/croot/bottleneck_1709069969633/work
 Brotli @ file:///C:/b/abs_3d36mno480/croot/brotli-split_1714483178642/work
+CacheControl==0.14.2
 cachetools @ file:///C:/b/abs_792zbtc0ua/croot/cachetools_1713977157919/work
 certifi @ file:///C:/b/abs_7bbxxprxir/croot/certifi_1720453609121/work/certifi
 cffi @ file:///C:/b/abs_78eb1_vq6z/croot/cffi_1714483206096/work
@@ -80,6 +81,7 @@ cytoolz @ file:///C:/b/abs_d43s8lnb60/croot/cytoolz_1701723636699/work
 dask @ file:///C:/b/abs_b0it6fcs79/croot/dask-core_1715838625158/work
 dask-expr @ file:///C:/b/abs_cf38ehsxus/croot/dask-expr_1715846496633/work
 datashader @ file:///C:/b/abs_d35eq98l_y/croot/datashader_1718121511257/work
+dateparser==1.2.1
 debugpy @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/debugpy_1699554994633/work
 decorator @ file:///opt/conda/conda-bld/decorator_1643638310831/work
 defusedxml @ file:///tmp/build/80754af9/defusedxml_1615228127516/work
@@ -96,6 +98,7 @@ executing @ file:///opt/conda/conda-bld/executing_1646925071911/work
 fastapi==0.112.2
 fastjsonschema @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/python-fastjsonschema_1699475134300/work
 filelock @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/filelock_1701807523603/work
+firebase-admin==6.6.0
 flake8 @ file:///C:/b/abs_caud66drfv/croot/flake8_1708965316778/work
 Flask @ file:///C:/b/abs_f9w7doyu0h/croot/flask_1716545924884/work
 flet==0.23.2
@@ -114,8 +117,15 @@ google-api-python-client==2.161.0
 google-auth==2.38.0
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.1
+google-cloud-core==2.4.2
+google-cloud-firestore==2.20.0
+google-cloud-storage==3.0.0
+google-crc32c==1.6.0
+google-resumable-media==2.7.2
 googleapis-common-protos==1.68.0
 greenlet @ file:///C:/b/abs_a6c75ie0bc/croot/greenlet_1702060012174/work
+grpcio==1.71.0rc2
+grpcio-status==1.71.0rc2
 h11 @ file:///C:/b/abs_1czwoyexjf/croot/h11_1706652332846/work
 h5py @ file:///C:/b/abs_c4ha_1xv14/croot/h5py_1715094776210/work
 HeapDict @ file:///Users/ktietz/demo/mc3/conda-bld/heapdict_1630598515714/work
@@ -172,10 +182,14 @@ jupyterlab-widgets @ file:///tmp/build/80754af9/jupyterlab_widgets_1609884341231
 jupyterlab_server @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/jupyterlab_server_1701806563401/work
 keyring @ file:///C:/b/abs_78uoj9sw00/croot/keyring_1709632550180/work
 kiwisolver @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/kiwisolver_1699476425777/work
+langchain==0.3.19
 langchain-core==0.3.37
 langchain-openai==0.3.6
 langchain-text-splitters==0.3.6
-langsmith==0.3.10
+langgraph==0.2.74
+langgraph-checkpoint==2.0.16
+langgraph-sdk==0.1.53
+langsmith==0.3.11
 lazy-object-proxy @ file:///C:/b/abs_19td_nzb6n/croot/lazy-object-proxy_1712908735070/work
 lazy_loader @ file:///C:/b/abs_3fs2i5w5p3/croot/lazy_loader_1718176758844/work
 lckr_jupyterlab_variableinspector @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/jupyterlab-variableinspector_1709167201477/work
@@ -204,7 +218,7 @@ mkl-service==2.4.0
 more-itertools @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/more-itertools_1701811589421/work
 moviepy==2.1.2
 mpmath @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/mpmath_1699484863771/work
-msgpack @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/msgpack-python_1699473924872/work
+msgpack==1.1.0
 multidict @ file:///C:/b/abs_44ido987fv/croot/multidict_1701097803486/work
 multipledispatch @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/multipledispatch_1699473951974/work
 mypy @ file:///C:/b/abs_66qgae7agv/croot/mypy-split_1718008473940/work
@@ -256,7 +270,7 @@ prompt-toolkit @ file:///C:/b/abs_68uwr58ed1/croot/prompt-toolkit_1704404394082/
 propcache==0.3.0
 Protego @ file:///tmp/build/80754af9/protego_1598657180827/work
 proto-plus==1.26.0
-protobuf==3.20.3
+protobuf==5.29.3
 psutil @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/psutil_1699482842340/work
 ptyprocess @ file:///tmp/build/80754af9/ptyprocess_1609355006118/work/dist/ptyprocess-0.7.0-py2.py3-none-any.whl
 pure-eval @ file:///opt/conda/conda-bld/pure_eval_1646925070566/work
@@ -305,7 +319,7 @@ python-lsp-server @ file:///C:/b/abs_2cdyzvcq4z/croot/python-lsp-server_17089717
 python-slugify @ file:///tmp/build/80754af9/python-slugify_1620405669636/work
 python-snappy @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/python-snappy_1699564939880/work
 pytoolconfig @ file:///C:/b/abs_f2j_xsvrpn/croot/pytoolconfig_1701728751207/work
-pytz @ file:///C:/b/abs_6ap4tsz1ox/croot/pytz_1713974360290/work
+pytz==2025.1
 pyviz_comms @ file:///C:/b/abs_674gfmqoxa/croot/pyviz_comms_1711136872853/work
 pywavelets @ file:///C:/b/abs_7est386xsb/croot/pywavelets_1705049855879/work
 pywin32==305.1
@@ -394,6 +408,7 @@ Twisted @ file:///C:/b/abs_e7yqd811in/croot/twisted_1708702883769/work
 twisted-iocpsupport @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/twisted-iocpsupport_1699496891011/work
 typing_extensions==4.12.2
 tzdata @ file:///croot/python-tzdata_1690578112552/work
+tzlocal==5.3
 uc-micro-py @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/uc-micro-py_1699545612984/work
 ujson @ file:///C:/b/abs_c93a278xy4/croot/ujson_1717598062082/work
 unicodedata2 @ file:///C:/b/abs_b6apldlg7y/croot/unicodedata2_1713212998255/work
@@ -423,10 +438,3 @@ zict @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/zict_169954
 zipp @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/zipp_1707493775475/work
 zope.interface @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/zope.interface_1699497164709/work
 zstandard==0.23.0
-google-auth
-google-auth-oauthlib
-google-auth-httplib2
-google-api-python-client
-dateparser
-flask
-firebase-admin
