@@ -72,7 +72,6 @@ hackathong4246
 │   ├───features
 │   │       get_available_time.py
 │   │       schedule.py
-│   │       schedule_list.py
 │   │       travel_time.py
 │   │       weather.py
 │   │
@@ -90,7 +89,6 @@ hackathong4246
 └───utils
         env.py
         text.py
-
 
 ```
 
