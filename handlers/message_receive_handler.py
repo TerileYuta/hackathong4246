@@ -1,12 +1,12 @@
-import re
+# services/handlers/message_receive_handler.py
 
-from services.features.get_available_time import get_available_time
+import re
 from services.features.travel_time import reply_travel_time
 from services.features.get_available_time import reply_available_time
 from services.features.travel_time import reply_travel_time
 from services.features.schedule_list import reply_events
 from services.features.weather import reply_weather
-
+from services.features.firestore_logic import get_user_state, update_user_state
 from .langgraph import Model
 
 from .lineProfile import get_user_display_name
@@ -51,7 +51,6 @@ def update_user_state(line_id, state, context=None):
 
 def receiveMessage_Handler(event):
     """
-
     受信したメッセージを分析し、リプライメッセージを作成する
 
     Parameters
@@ -61,11 +60,7 @@ def receiveMessage_Handler(event):
     Returns
     ----------
         dict : リプライメッセージに関する情報
-
     """
-
-    #TODO : DB移行後state関連処理はstateフォルダのstate.pyに移動
-
     message = event.message.text  # 受信したメッセージのテキストを取得
     line_ids = []
 
@@ -94,11 +89,8 @@ def receiveMessage_Handler(event):
     context = state_data['context'] if state_data else None
     """
 
-    #TODO : DB移行後下記ルールベース関連処理はrurleフォルダのrurle.pyに移動
-
     # ルールベース関連処理
     """
-    # メッセージに天気に関するキーワードが含まれている場合
     if "天気" in message:
         # 状態がNoneの場合は、都市名を尋ねて天気の検索を開始
         update_user_state(line_id, "waiting_for_city", None)  # ユーザーの状態を"waiting_for_city"に更新
@@ -124,7 +116,6 @@ def receiveMessage_Handler(event):
             "text": f"あなたのメッセージ：{message}"  # 認識できないメッセージをそのまま表示
         }
     ]
-
     """
 
     # TODO グループでも送られてしまう問題あり
