@@ -7,21 +7,32 @@ import datetime
 import dateparser
 from dateutil.relativedelta import relativedelta
 from services.google_calendar_api.calendar_api_connection import  GoogleCalendarAPI
+from config import Config
 
 def get_available_time(line_id, time_range="tomorrow", specific_date=None, timezone="Asia/Tokyo"):
     """
+
     指定された期間または日付の空き時間を Google カレンダーから取得する
+
     Parameters
     ----------
         line_id(str) : LINEのユーザーID
         time_range(str) : 検索したい期間（例: "today", "tomorrow", "this_week", "next_month"）
         specific_date(str, optional) : 特定の日付（例: "2025-03-10"）
         timezone(str) : タイムゾーン（デフォルトは "Asia/Tokyo"）
+
     Returns
     ----------
         list : 空き時間のリスト（例: ["2025-03-10 09:00 - 10:00", ...]）
+
     """
     calendar_api = GoogleCalendarAPI(line_id)
+    not_auth = calendar_api.authenticate()
+
+    # Oauth承認が必要になった場合
+    if not_auth:
+        return False, Config.auth_error_msg
+    
     service = calendar_api.calendar
     local_tz = pytz.timezone(timezone)
     now = datetime.datetime.now(local_tz)
@@ -40,21 +51,25 @@ def get_available_time(line_id, time_range="tomorrow", specific_date=None, timez
         for e in events_result.get("items", [])
     ]
     
-    return calculate_free_time_ranges(start_date, end_date, busy_times, local_tz)
+    return True, calculate_free_time_ranges(start_date, end_date, busy_times, local_tz)
 
 
 def calculate_date_range(time_range, now, specific_date, local_tz):
     """
+
     指定された期間または日付に基づいて開始日と終了日を計算する
+
     Parameters
     ----------
         time_range(str) : 検索したい期間（例: "today", "tomorrow", "this_week", "next_month"）
         now(datetime) : 現在の日時
         specific_date(str, optional) : 特定の日付（例: "2025-03-10"）
         local_tz(pytz.timezone) : ローカルタイムゾーン
+
     Returns
     ----------
         tuple : 計算された開始日と終了日 (datetime, datetime)
+
     """
 
     if specific_date:
@@ -78,16 +93,20 @@ def calculate_date_range(time_range, now, specific_date, local_tz):
 
 def calculate_free_time_ranges(start_date, end_date, busy_times, local_tz):
     """
+
     予約済みの時間を除外して、空き時間を計算する
+
     Parameters
     ----------
         start_date(datetime) : 検索開始日時
         end_date(datetime) : 検索終了日時
         busy_times(list) : 予約済みの時間（(start, end)のタプルリスト）
         local_tz(pytz.timezone) : ローカルタイムゾーン
+
     Returns
     ----------
-        list : 空き時間のリスト（例: ["2025-03-10 09:00 - 10:00", ...]）
+        list : 空き時間のリスト（例: ["2025-03-10 09:00 - 10:00", ...])
+
     """
 
     available_times = {current_day.date().strftime("%Y-%m-%d"): [{"start": current_day.replace(hour=0, minute=0),
@@ -119,14 +138,18 @@ def calculate_free_time_ranges(start_date, end_date, busy_times, local_tz):
 
 def search_available_time(line_id, user_message):
     """
+
     メッセージを解析して、空き時間を検索
+
     Parameters
     ----------
         line_id(str) : LINEのユーザーID
-        user_message(str) : ユーザーからのメッセージ（例: "今週の空き時間を教えて"）
+        user_message(str) : ユーザーからのメッセージ（例: "今週の空き時間を教えて")
+
     Returns
     ----------
         str : 空き時間のリストまたはエラーメッセージ
+
     """
 
     time_map = {
@@ -154,13 +177,17 @@ def search_available_time(line_id, user_message):
 
 def answer_available_time(event: dict):
     """
+
     受信したメッセージを分析し、リプライメッセージを作成する
+
     Parameters
     ----------
         event (dict) : LINEメッセージイベント (userId, メッセージを含む)
+
     Returns
     ----------
-        list : LINEボット用のリプライメッセージ（辞書のリスト）
+        list : LINEボット用のリプライメッセージ(辞書のリスト)
+
     """
     user_id = event.source.userId  # LINEのuserIdを取得
     message = event.message.text  # ユーザーメッセージを取得

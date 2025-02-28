@@ -143,10 +143,8 @@ def callback():
 # Message受信イベント
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
-    user_text = event.message.text
-    user_id = event.source.user_id
     
-    replyList = receiveMessage_Handler(user_text)
+    replyList = receiveMessage_Handler(event)
     sendMessage_Handler(replyList, event)
 
 # 友達追加イベント

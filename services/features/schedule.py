@@ -1,98 +1,224 @@
 from ..google_calendar_api import GoogleCalendarAPI
-from datetime import datetime
+from datetime import datetime, timedelta
+from pytz import timezone
 
-class Schedule:
-    def __init__(self, line_id : str):
-        calendar = GoogleCalendarAPI(line_id)
-        calendar.authenticate()
-        
-        self.service = calendar.service
+from config import Config
 
-    def add_event(self, summary: str, start_time: datetime, end_time: datetime, description: str = "", location: str = "",):
-        """
-        
-        予定の追加処理
-
-        Parameters
-        ----------
-            summary(str) : 予定のタイトル
-            start_time(datetime) : 開始時間
-            end_time(dateime) : 終了時刻
-            description(str) : 予定の説明
-            location (str) : 場所
-
-        Returns
-        ----------
-            dict : 作成された予定の情報
-
-
-        """
-
-        event = {
-            'summary': summary,
-            'location': location,
-            'description': description,
-            'start': {
-                'dateTime': start_time.isoformat(),
-                'timeZone': 'Asia/Tokyo',
-            },
-            'end': {
-                'dateTime': end_time.isoformat(),
-                'timeZone': 'Asia/Tokyo',
-            },
-        }
-
-        event = self.service.events().insert(calendarId='primary', body=event).execute()
-
-        return event
+def add_event(line_id: str, summary: str, start_time: datetime, end_time: datetime, description: str = "", location: str = "",):
+    """
     
-    def update_event(self, event_id, summary=None, start_time=None, end_time=None, description=None, location=None):
-        """
-        
-        予定の編集処理
+    予定の追加処理
 
-        Parameters
-        ----------
-            event_id(str) : 更新するイベントのID
-            summary (str): 新しいタイトル
-            start_time (datetime): 新しい開始時刻
-            end_time (datetime): 新しい終了時刻
-            description (str): 新しい説明
-            location (str): 新しい場所
+    Parameters
+    ----------
+        line_id(str) : LINE ID
+        summary(str) : 予定のタイトル
+        start_time(datetime) : 開始時間
+        end_time(dateime) : 終了時刻
+        description(str) : 予定の説明
+        location (str) : 場所
 
-        Returns
-        ----------
-            dict: 更新されたイベントの情報
+    Returns
+    ----------
+        dict : 作成された予定の情報
 
-        """
-         
-        event = self.service.events().get(calendarId='primary', eventId=event_id).execute()
 
-        # 更新する項目のみを変更
-        if summary:
-            event['summary'] = summary
-        if location:
-            event['location'] = location
-        if description:
-            event['description'] = description
-        if start_time:
-            event['start']['dateTime'] = start_time.isoformat()
-        if end_time:
-            event['end']['dateTime'] = end_time.isoformat()
+    """
 
-        updated_event = self.service.events().update(
-            calendarId='primary', eventId=event_id, body=event).execute()
-        
-        return updated_event
+    calendar_api = GoogleCalendarAPI(line_id)
+    auth = calendar_api.authenticate()
+
+    if auth:
+        return False, Config.auth_error_msg
     
-    def delete_event(self, event_id):
-        """
+    service = calendar_api.calendar
 
-        予定を削除する
-        
-        Parameters
-        ----------
-            event_id (str): 削除するイベントのID
+    event = {
+        'summary': summary,
+        'location': location,
+        'description': description,
+        'start': {
+            'dateTime': start_time.isoformat(),
+            'timeZone': 'Asia/Tokyo',
+        },
+        'end': {
+            'dateTime': end_time.isoformat(),
+            'timeZone': 'Asia/Tokyo',
+        },
+    }
 
-        """
-        self.service.events().delete(calendarId='primary', eventId=event_id).execute()
+    event = service.events().insert(calendarId='primary', body=event).execute()
+
+    return True, event
+
+def update_event(line_id:str, event_id, summary=None, start_datetime:datetime=None, end_datetime:datetime=None, description=None, location=None):
+    """
+    
+    予定の編集処理
+
+    Parameters
+    ----------
+        line_id(str) : LINE ID
+        event_id(str) : 更新するイベントのID
+        summary (str): 新しいタイトル
+        start_datetime (datetime): 新しい開始時刻
+        end_datetime (datetime): 新しい終了時刻
+        description (str): 新しい説明
+        location (str): 新しい場所
+
+    Returns
+    ----------
+        dict: 更新されたイベントの情報
+
+    """
+
+    calendar = GoogleCalendarAPI(line_id)
+    auth = calendar.authenticate()
+
+    if auth:
+        return False, Config.auth_error_msg
+    
+    service = calendar.calendar
+
+    jst = timezone('Asia/Tokyo')  # 日本時間のタイムゾーンを指定
+
+
+    event = service.events().get(calendarId='primary', eventId=event_id).execute()
+
+    # 更新する項目のみを変更
+    if summary:
+        event['summary'] = summary
+    if location:
+        event['location'] = location
+    if description:
+        event['description'] = description
+    if start_datetime:
+        if start_datetime.tzinfo is None:
+            start_datetime =jst.localize(start_datetime)
+  
+
+        event['start']['dateTime'] = start_datetime.isoformat()
+    if end_datetime:
+        if end_datetime.tzinfo is None:
+            end_datetime = jst.localize(end_datetime)
+        event['end']['dateTime'] = end_datetime.isoformat()
+
+    new_event = service.events().update(calendarId='primary', eventId=event_id, body=event).execute()
+    
+    return True, new_event
+
+def delete_event(line_id, event_id):
+    """
+
+    予定を削除する
+    
+    Parameters
+    ----------
+        line_id(str) : LINE ID
+        event_id (str): 削除するイベントのID
+
+    """
+
+    calendar = GoogleCalendarAPI(line_id)
+    auth = calendar.authenticate()
+
+    if auth:
+        return False, Config.auth_error_msg
+    
+    service = calendar.calendar
+    
+    event = service.events().delete(calendarId='primary', eventId=event_id).execute()
+
+    return True, event
+
+def getEvents(line_id:str, start_datetime:datetime, end_datetime:datetime):
+    """
+
+    指定した日のイベントを取得する関数
+    Parameters
+    ----------
+        line_id(str) : Line ID
+        start_date(datetime) : 予定を取得したい範囲の下限
+        end_date(datetime) : 予定を取得したい範囲の上限
+
+
+    Returns
+    ---------- 
+        list/dict : 取得したイベントのリスト
+            [{"id": "abc123",
+                "summary": "ミーティング",
+                "start": {"dateTime": "2025-02-24T10:00:00+09:00"},
+                "end": {"dateTime": "2025-02-24T11:00:00+09:00"},
+                "location": "東京オフィス",
+                "attendees": ["user1@example.com", "user2@example.com"]
+            }]
+  
+    """ 
+
+    calendar = GoogleCalendarAPI(line_id)
+    auth = calendar.authenticate()
+
+    if auth:
+        return False, Config.auth_error_msg
+    
+    service = calendar.calendar
+
+    jst = timezone('Asia/Tokyo')  # 日本時間のタイムゾーンを指定
+    """
+    # 日本時間 (Asia/Tokyo) を設定
+    
+    # 指定した日付を datetime オブジェクトに変換
+    date_dt = datetime.strptime(date, '%Y-%m-%d')  # 入力された日付文字列を datetime オブジェクトに変換
+
+    # 検索する範囲を timeMin と timeMax に設定（指定した日付の 00:00:00 と 23:59:59）
+    time_min = date_dt.replace(tzinfo=jst).isoformat()  # 開始日時を 00:00:00 に設定し、ISO 8601 形式に変換
+    time_max = (date_dt.replace(tzinfo=jst) + timedelta(days=1)).isoformat()  # 終了日時を 23:59:59 に設定（+1日して 23:59:59 に）
+    """
+
+    if start_datetime.tzinfo is None:
+        start_datetime =jst.localize(start_datetime)
+    if end_datetime.tzinfo is None:
+        end_datetime = jst.localize(end_datetime)
+
+    events = get_events_from_GcalenderAPI(service, start_datetime, end_datetime) #予定を検索    
+
+    extracted_events = []
+
+    for event in events:
+        extracted_events.append({
+            "id": event.get("id"),
+            "summary": event.get("summary", "（無題）"),
+            "start": event.get("start", {}),
+            "end": event.get("end", {}),
+            "location": event.get("location", "未設定"),
+            "attendees": [attendee["email"] for attendee in event.get("attendees", [])]
+        })
+
+    return True, extracted_events
+
+def get_events_from_GcalenderAPI(service, time_min,time_max):
+    """
+    
+    指定した時間範囲のイベントをGoogle Calender APIで取得する関数
+
+    Parameters
+    ----------
+        time_min: 取得開始時刻(IAPISO 8601形式)
+        time_max: 取得終了時刻(ISO 8601形式)
+    
+    Returns
+    ----------
+        return: 取得したイベントのリスト
+    
+    """
+
+    # Google カレンダー API でイベントを取得
+    events_result = service.events().list(
+        calendarId='primary',  # 'primary' はメインカレンダーを指定
+        timeMin=time_min.isoformat(),  # 開始日時（指定した日の 00:00:00）
+        timeMax=time_max.isoformat(),  # 終了日時（指定した日の 23:59:59）
+        singleEvents=True,  # 繰り返しイベントも単一イベントとして扱う
+        orderBy='startTime'  # イベントを開始時刻でソート
+    ).execute()  # API を実行してイベントを取得
+
+    return events_result.get('items', [])  # イベント情報を取得

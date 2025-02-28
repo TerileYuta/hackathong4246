@@ -1,8 +1,23 @@
 import requests
-import datetime
+from datetime import datetime
+from utils.env import get_env
 
-def get_weather(city, dt):
-    API_KEY = "f876f83f4fdae211dfb31f2cd260d9aa"  # OpenWeatherMapのAPIキーを入力
+def get_weather(city:str, dt:datetime):
+    """
+    
+    天気予報を取得する
+
+    Parameters
+    ----------
+        city(str) : 場所
+        dt(datetime) : 日時
+
+    Returns
+    ----------
+        
+
+    """
+    API_KEY = get_env("OPENWEATHER_API_KEY")  
     URL = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={API_KEY}&units=metric&lang=ja"
 
     response = requests.get(URL)
@@ -10,39 +25,24 @@ def get_weather(city, dt):
 
     # エラーハンドリング
     if response.status_code != 200:
-        return {"error": f"APIリクエスト失敗: {data}"}
-
-    # 入力日時をdatetime形式に変換
-    input_dt = datetime.datetime.strptime(dt, "%Y-%m-%d %H:%M")
+        return False, "失敗"
 
     # 予報データを datetime 形式で取得
     forecast_data = []
     for forecast in data["list"]:
-        forecast_time = datetime.datetime.strptime(forecast["dt_txt"], "%Y-%m-%d %H:%M:%S")
+        forecast_time = datetime.strptime(forecast["dt_txt"], "%Y-%m-%d %H:%M:%S")
         weather = forecast["weather"][0]["description"]
         temp = forecast["main"]["temp"]
         forecast_data.append((forecast_time, weather, temp))
 
     # 未来のデータがない場合
-    if input_dt > forecast_data[-1][0]:
-        return {"error": f"未来すぎて予報データがありません: {dt}"}
+    if dt > forecast_data[-1][0]:
+        return True, {"error": f"未来すぎて予報データがありません: {dt}"}
 
     # 指定日時に最も近いデータを探す
-    nearest_forecast = min(forecast_data, key=lambda x: abs(x[0] - input_dt))
+    nearest_forecast = min(forecast_data, key=lambda x: abs(x[0] - dt))
 
-    return {
+    return True, {
         "weather": nearest_forecast[1],
         "temp": nearest_forecast[2]
     }
-
-# 例: 2025年2月27日の12:30の天気を取得（東京）
-city_name = "Tokyo"
-target_date = "2025-02-27 12:30"  # YYYY-MM-DD HH:MM の形式で入力
-
-result = get_weather(city_name, target_date)
-
-# 結果を表示
-if "error" in result:
-    print(result["error"])
-else:
-    print(f"天気: {result['weather']}, 気温: {result['temp']}°C")

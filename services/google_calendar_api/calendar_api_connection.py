@@ -22,7 +22,7 @@ class GoogleCalendarAPI():
         authenticate() : Google カレンダー API の認証を行い、認証済みのサービスオブジェクトを返す
 
     """
-    def __init__(self, line_id:str):
+    def __init__(self, line_id:str, root_url: str = ""):
         """
         
         Parameters
@@ -34,9 +34,7 @@ class GoogleCalendarAPI():
         self.SCOPES = ['https://www.googleapis.com/auth/calendar']
 
         self.line_id = line_id
-        token = self.getToken()
-        self.calendar = self.authenticate()
-        # self.root_url = root_url
+        self.root_url = root_url
 
     def getToken(self):
         """
@@ -146,6 +144,6 @@ class GoogleCalendarAPI():
                 return authorization_url
         
         # If credentials are valid, build the Google Calendar API service
-        self.service = build("calendar", "v3", credentials=creds)
+        self.calendar = build("calendar", "v3", credentials=creds)
 
-        return self.service  # Return the service object
+        return False  
